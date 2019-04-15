@@ -143,7 +143,7 @@ class RemotePeerInfo {
             return 0;
         }
         else{
-            return(n+1)+setcount(bkey>>1);
+            return(bkey+1)+setcount(bkey>>1);
         }
     }
 
