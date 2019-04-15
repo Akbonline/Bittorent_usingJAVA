@@ -1,17 +1,66 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class Messages {
-	private final byte _chokeType = 0;
-	private final byte _unchokeType = 1;
-	private final byte _interestedType = 2;
-	private final byte _notInterestedType = 3;
-	private final byte _haveType = 4;
-	private final byte _bitfieldType = 5;
-	private final byte _requestType = 6;
-	private final byte _pieceType = 7;
+	//Types of messages
+	private final byte _chokeType = (byte) 0;
+	private final byte _unchokeType = (byte) 1;
+	private final byte _interestedType = (byte) 2;
+	private final byte _notInterestedType = (byte) 3;
+	private final byte _haveType = (byte) 4;
+	private final byte _bitfieldType = (byte) 5;
+	private final byte _requestType = (byte) 6;
+	private final byte _pieceType = (byte) 7;
 	private byte[] _requestPayload;
 	private byte[] _piecePayload;
 	private byte[] _bitfieldPayload;
 	private byte[] _havePayload;
+	//Message
+	private byte type;
+	private byte[] payload;
+	private int messageLength; 
+			
+	//Constructor
+	Messages(byte type, byte[] payload) throws ClassNotFoundException {
+		this.type = type;
+		this.payload = payload;
+		defineMessageLength(); //TODO: when is it needed?
+		defineMessage();
+	}
+	
+	//Defining the length of the message
+	public void defineMessageLength(){
+		if (this.getPayload() == null) {
+			this.setMessageLength(0);
+		} else {  //length of the type which is 1 + length of the payload
+			this.setMessageLength(this.getPayload().length + 1);
+		}
+	}
+	
+	//Defining what is the message type
+	public void defineMessage() throws ClassNotFoundException{
+		byte t = this.getType();
+		if (Byte.compare(t, (byte) 0) == 0) {
+			choke();}
+		else if (Byte.compare(t, (byte) 1) == 0) {
+			unchoke();}
+		else if (Byte.compare(t, (byte) 2) == 0) {
+			interested();}
+		else if (Byte.compare(t, (byte) 3) == 0) {
+			notInterested();}
+		else if (Byte.compare(t, (byte) 4) == 0) {
+			have(new byte[this.getPayload().length]);}
+		else if (Byte.compare(t, (byte) 5) == 0) {
+			bitfield(new byte[this.getPayload().length]);}
+		else if (Byte.compare(t, (byte) 6) == 0) {
+			request(new byte[this.getPayload().length]);}
+		else if (Byte.compare(t, (byte) 7) == 0) {
+			piece(new byte[this.getPayload().length]);}
+		else {
+			throw new ClassNotFoundException ("type is not valid: " + Byte.toString(t));
+		}
+	}
 			
 	//Unchoke
 	public void unchoke(){
@@ -39,7 +88,6 @@ public class Messages {
 		byte notInterestedType = this._notInterestedType;
 	}
 	
-	
 	//Bitfield
 	public void bitfield(byte[] bitfield) {
 		byte bitfieldType = this._bitfieldType;
@@ -66,7 +114,23 @@ public class Messages {
 	//TODO: Implementing Have (int pieceIdx), if necessary (Have.java)
 	//TODO: Implement piece.java (IMPORTANT)
 
-	//Getters
+	//Reading Message //TODO: Needs to be re-structured
+	public void readMessage (DataInputStream in) throws IOException{
+        if ((this.getPayload() != null) && (this.getPayload().length) > 0) {
+            in.readFully(this.getPayload(), 0, this.getPayload().length);
+        }
+    }
+	
+	//Writing Message //TODO: Needs to be re-structured
+	public void writeMessage (DataOutputStream out) throws IOException{
+        out.writeInt (this.getMessageLength());
+        out.writeByte (this.getType());
+        if ((this.getPayload() != null) && (this.getPayload().length > 0)) {
+            out.write (this.getPayload(), 0, this.getPayload().length);
+        }
+    }
+	
+	//Setters and Getters
 	
 	public byte get_chokeType() {
 		return _chokeType;
@@ -131,6 +195,28 @@ public class Messages {
 	public void set_havePayload(byte[] _havePayload) {
 		this._havePayload = _havePayload;
 	}
-	
 
+	public byte getType() {
+		return type;
+	}
+
+	public void setType(byte type) {
+		this.type = type;
+	}
+
+	public byte[] getPayload() {
+		return payload;
+	}
+
+	public void setPayload(byte[] payload) {
+		this.payload = payload;
+	}
+
+	public int getMessageLength() {
+		return messageLength;
+	}
+
+	public void setMessageLength(int i) {
+		this.messageLength = i;
+	}
 }
