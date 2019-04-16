@@ -1,8 +1,12 @@
 import java.util.*;
 import java.io.*;
+import java.text.*;
 class PeerInformation{
     public final List capsule= new ArrayList<>();
+    public final Collection<PeerInformation> PeerList= new LinkedList();    //PeerInformation type list
+    public final List pcapsule=new ArrayList<>();   //Contains Configuration file and Comment Character
     public BitSet pktsreceived;
+    public final List prop=new ArrayList();
     public PeerInformation(int ID){
         capsule.add(0,ID);       //Peer ID   :   String
         capsule.add(1,"127.0.0.1");       //Peer IP Address   :   String
@@ -10,15 +14,19 @@ class PeerInformation{
         capsule.add(3,false);       //has some Data or File :   Boolean
         capsule.add(4,0);       //Corresponding Peer ID :   Atomic Integer
         capsule.add(5,false);       //Connection Requested or not   :   AtomicBoolean
+        pcapsule.add(0,"PeerInfo.cfg"); //Adding the configuration file name
+        pcapsule.add(1,"#");    //Comment Character
     }
     public PeerInformation(String ID,String IP,String Port,boolean notEmpty){
-        capsule.add(1,ID);       //Peer ID   :   String
-        capsule.add(2,IP);       //Peer IP Address   :   String
-        capsule.add(3,Port);       //Peer Port Number  :   String
-        capsule.add(4,notEmpty);       //has some Data or File :   Boolean
-        capsule.add(5,0);       //Corresponding Peer ID :   Atomic Integer
-        capsule.add(6,false);       //Connection Requested or not   :   AtomicBoolean
+        capsule.add(0,ID);       //Peer ID   :   String
+        capsule.add(1,IP);       //Peer IP Address   :   String
+        capsule.add(2,Port);       //Peer Port Number  :   String
+        capsule.add(3,notEmpty);       //has some Data or File :   Boolean
+        capsule.add(4,0);       //Corresponding Peer ID :   Atomic Integer
+        capsule.add(5,false);       //Connection Requested or not   :   AtomicBoolean
         pktsreceived=new BitSet();  //BitSet type of packets received
+        pcapsule.add(0,"PeerInfo.cfg"); //Adding the configuration file name
+        pcapsule.add(1,"#");    //Comment Character
     }
     public Object getPeerInfo(int i){       //Returns the Peerinformation requested
         return capsule.get(i);      //return type=Object
@@ -35,6 +43,33 @@ class PeerInformation{
         }
     }
 
+    public void fetch(Reader inputFile){    // Input Buffered Reader
+        BufferedReader input=new BufferedReader(inputFile);
+        String line;
+        int index=0;
+        boolean notEmpty=false;
+        while((line = input.readLine()) != null){       //Until there's data in the input buffer
+            if(line.length()<=0){
+                if(line.startsWith((String)(pcapsule.get(1)))){     //if the current line starts with # (Comment)
+                    continue;
+                }
+            }
+            else{
+                String statement[]=line.split("\\s+");      //If not keep spliting 
+                if(statement.length!=4){    
+                throw new ParseException(line,index);   //Error handling for invalid inputs
+                }
+            
+            if(statement[3].trim().compareTo("1")==0){      //If there's still some data in the input buffer
+                notEmpty=true;
+            }
+            
+            PeerList.add(new PeerInformation(statement[0].trim(),statement[1].trim(),statement[2].trim(),notEmpty));//Create a new PeerInfo candidate
+            index++;
+            }
+        }
+    }
+    
     @Override
     public int hashCode() {             //It has to be the same in the receiving side
         int key=(Integer)(this.capsule.get(0));     // Get the key
@@ -45,11 +80,11 @@ class PeerInformation{
     }
     @Override
     public boolean equals (Object obj) {
-        if (obj == null) {
+        if (obj == null) {          //If comparison value is empty
             return false;
         }
         if (obj instanceof PeerInformation) {
-            return (((PeerInformation) obj).capsule.get(0).equals (capsule.get(0)));
+            return (((PeerInformation) obj).capsule.get(0).equals (capsule.get(0))); //Peer Candidate compare
         }
         return false;
     }
@@ -60,7 +95,4 @@ class PeerInformation{
         }
         return ids;
     }
-
-
-
 }
