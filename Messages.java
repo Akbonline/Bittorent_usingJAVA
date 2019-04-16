@@ -1,6 +1,10 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.BitSet;
 
 public class Messages {
 	//Types of messages
@@ -78,6 +82,11 @@ public class Messages {
 		this.set_havePayload(payload);
 	}
 	
+	// When getting the content of an element of byte array when having that
+	public void havePiece(int index) {
+		pieceIndexBytes(index);
+	}	
+	
 	//Interested
 	public void interested(){
 		byte interestedType = this._interestedType;
@@ -94,25 +103,51 @@ public class Messages {
 		this.set_bitfieldPayload(bitfield);
 	}
 	
-	//TODO: Bitfield constructor with bitset as input, if needed
-	
+	//Bitfield constructor with BitSet
+	public void bitfield(BitSet payload){
+		this.setType(_bitfieldType);
+		this.setPayload(payload.toByteArray());
+		this.set_bitfieldPayload(payload.toByteArray());
+	}
 	
 	//Request
 	public void request(byte[] payload){
 		byte requestType = this._requestType;
 		this.set_requestPayload(payload);
 	}
+	// When requesting for the content of an element of byte array
+	public void requestPiece(int index) {
+		pieceIndexBytes(index);
+	}
 	
-	//Piece
+	//Piece  
 	public void piece(byte[] payload){
 		byte pieceType = this._pieceType;
 		this.set_piecePayload(payload);
 	}
+	
+	//Piece constructor with index and array of content   //TODO: Needs to be re-structured more
+	public void piece(int index, byte[] content) {
+		this.setType(_pieceType);
+		byte[] payload;
+		if(content == null) {
+			payload = new byte[4];
+		} 
+		else {
+			payload = new byte[4 + content.length];
+		}
+        System.arraycopy(pieceIndexBytes (index), 0, payload, 0, 4);
+        System.arraycopy(content, 0, payload, 4, content.length);
+        this.set_piecePayload(payload);
+    }
 
-	//TODO: Adding the method to get the byte number and returns which type it is. (Type.java)
-	//TODO: Implementing Request (int pieceIdx), if necessary (Request.java)
-	//TODO: Implementing Have (int pieceIdx), if necessary (Have.java)
-	//TODO: Implement piece.java (IMPORTANT)
+	//Get the content of a piece    //TODO: Needs to be re-structured more
+	public byte[] getPieceContent() {
+        if ((this.getPayload() == null) || (this.getPayload().length <= 4)) {
+            return null;
+        }
+        return Arrays.copyOfRange(this.getPayload(), 4, this.getPayload().length);
+    }
 
 	//Reading Message //TODO: Needs to be re-structured
 	public void readMessage (DataInputStream in) throws IOException{
@@ -128,6 +163,18 @@ public class Messages {
         if ((this.getPayload() != null) && (this.getPayload().length > 0)) {
             out.write (this.getPayload(), 0, this.getPayload().length);
         }
+    }
+	
+	//Payload related functions
+	
+	//To get the index of piece   //TODO: Needs to be re-structured more
+    public int pieceIndex() {
+        return ByteBuffer.wrap(Arrays.copyOfRange(this.getPayload(), 0, 4)).order(ByteOrder.BIG_ENDIAN).getInt();
+    }
+
+    //To get the byte array of a specific index   //TODO: Needs to be re-structured more
+    public byte[] pieceIndexBytes (int index) {
+        return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(index).array();
     }
 	
 	//Setters and Getters
@@ -155,6 +202,10 @@ public class Messages {
 	public byte get_bitfieldType() {
 		return _bitfieldType;
 	}
+	
+	public BitSet getBitSet() {
+        return BitSet.valueOf (this.getPayload());
+    }
 
 	public byte get_requestType() {
 		return _requestType;
