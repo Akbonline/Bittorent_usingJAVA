@@ -1,0 +1,14 @@
+RemotePeerInfo : PeerInformation
+>_peerId    :   capsule.get(0)  
+>_peerAddress    :   capsule.get(1)  
+>_peerPort   :   capsule.get(2)  
+>_hasFile    :   capsule.get(3)  
+>_bytesDownloadedFrom    :   capsule.get(4)  
+>_interested    :   capsule.get(5)  
+>CONFIG_FILE_NAME    :   pcapsule.get(0)  
+>COMMENT_CHAR   :   pcapsule.get(1)  
+>_receivedParts  :   pktsreceived
+>add function   :   fetch
+>statement  :   token
+>notEmpty   :   bHasfile
+>i  :   index
