@@ -1,10 +1,11 @@
-package edu.ufl.cise.cnt5106c.log.modified;
-
-import edu.ufl.cise.cnt5106c.conf.PeerInformation;
 import java.io.*;
 import java.util.*;
-
-
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class AssistLog{
     private Logger SessionID;
@@ -20,7 +21,7 @@ public class AssistLog{
             else{
                 peer1AsString.append(", ");      
             }
-            peer1AsString.append(peer.getPeerId());     //Converts the Peer ID as Integer
+            peer1AsString.append(peer.getPeerInfo(0));     //Converts the Peer ID as Integer
         }
         check=1;
         for(Integer ID:pID){
@@ -62,7 +63,7 @@ public class AssistLog{
             LogManager.getLogManager().readConfiguration(in);
         }
         catch (IOException e) {
-            System.err.println(AssistLog.stackTraceToString(e));
+            //System.err.println(AssistLog.stackTraceToString(e));
             System.exit(1);
         }
         finally {
