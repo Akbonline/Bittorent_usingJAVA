@@ -23,17 +23,17 @@ public class startRemotePeers {
             System.out.println ("Remote peers have been started.");
         }
         catch (IOException e) {
-            //LogHelper.getLogger().severe (e); 	//TODO: Change based on Akshat's code
+            //LogHelper.getLogger().severe (e);
         }
         catch (ParseException e){
-        	//LogHelper.getLogger().severe (e); 	//TODO: Change based on Akshat's code
+        	//LogHelper.getLogger().severe (e); 
         }
         
         try {
         	in.close();
         }
         catch (Exception e) {
-        	//LogHelper.getLogger().severe (e); 	//TODO: Change based on Akshat's code
+        	//LogHelper.getLogger().severe (e);
         }
         
 	}
