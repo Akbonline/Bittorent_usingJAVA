@@ -126,7 +126,7 @@ public class Messages {
 		this.set_piecePayload(payload);
 	}
 	
-	//Piece constructor with index and array of content   //TODO: Needs to be re-structured more
+	//Piece constructor with index and array of content
 	public void piece(int index, byte[] content) {
 		this.setType(_pieceType);
 		byte[] payload;
@@ -141,7 +141,7 @@ public class Messages {
         this.set_piecePayload(payload);
     }
 
-	//Get the content of a piece    //TODO: Needs to be re-structured more
+	//Get the content of a piece
 	public byte[] getPieceContent() {
         if ((this.getPayload() == null) || (this.getPayload().length <= 4)) {
             return null;
